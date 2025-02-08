@@ -13,7 +13,7 @@ We propose the MotAli tool to compare two motifs representing potential TF BS. T
 MotAli tool requires the following input data:
 
 - FASTA file to recognize two motifs
-- two motifs, only PWM and SiteGA motif models are supported. PWM motif is represented by the position frequency matrix in a [standard format](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B.pfm), and the SiteGA model is the [list of locally positioned dinucleotides with their weights]((https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/PEAKS039234_BHLHA15_Q9QYC3_MACS2_1_40_cmat1), [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545).
+- two motifs, only PWM and SiteGA motif models are supported. PWM motif is represented by the position frequency matrix in a [standard format](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B.pfm), and the SiteGA model is the [list of locally positioned dinucleotides with their weights](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/PEAKS039234_BHLHA15_Q9QYC3_MACS2_1_40_cmat1), [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545).
 - two tables "Threshold vs. Expected Recognition Rate" computed preliminary with the FASTA file of promoters of protein-coding genes of whole genome, [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545), example FASTA file for [mouse](https://github.com/parthian-sterlet/mcot-kernel/blob/master/genomes/mm/ups2kb_mm10.seq.tar.gz)
 
 MotAli tool has two parameters:
