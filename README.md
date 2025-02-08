@@ -16,7 +16,7 @@ De novo motif search is the standard approach to detect nucleotide context speci
 - Histogram of AUPRC values as function of the mutual orientation of two motifs (they either in the same or opposite strands) and shift between the centers of two motifs
 - File with the list of PR curves for all possible orientation and shifts
 - Best AUPRC values for (a/b) the mild/stringent criteria on the overlap of the centers of two motifs, and (c) any possible shift beween centers of two motifs
-- 
+
 # Source code and command line arguments
 
 # Command line examples
