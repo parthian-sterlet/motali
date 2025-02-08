@@ -7,6 +7,9 @@ De novo motif search is the standard approach to detect nucleotide context speci
 We propose the MotAli tool to compare two motifs representing potential TF BS. The motif comparison is derived from prediction profiles of these motifs for given FASTA file of DNA sequences. All possible close
 
 # Algorithm
+Input data of the teted FASTA file, and two motif models are used to predict all co-occured motifs with respect to DNA strands. Co-occ
+Motif orientations and shift of motif cetners
+Two motifs may lie in the same DNA strand, othewise they lie in the opposite strand. The first case 'Direct' forward and reverse strands represent pairs of motifs '-> ->' and '<- <-', the second means the Inverted ans Everted orientations of two motifs, '-> <-' and '<- ->', respectively. All these cases are formilized by pairs of motifs 'motifA .. motifB' / 'motifB .. motifA' respecting positive/negative spacers. 
 
 # Input data and parameters
 
