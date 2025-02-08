@@ -27,4 +27,9 @@ MotAli tool has two parameters:
 
 # Source code and command line arguments
 
+[mco_prc.cpp](https://github.com/parthian-sterlet/motali/blob/main/src/mco_prc.cpp)
+
 # Command line examples
+- One PWM motif vs. another PWM motif
+
+[com_line_pwm_pwm](https://github.com/parthian-sterlet/motali/blob/main/run/com_line_pwm_pwm) command line for two PWM models [BHA15.H12CORE.0.P.B.pfm](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_pwm/BHA15.H12CORE.0.P.B.pfm) and [BHA15.H12CORE.1.SM.B.pfm](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_pwm/BHA15.H12CORE.1.SM.B.pfm) respecting two structurally distinct motif types for [murine BHLHA15 TF](https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:22265)  from [Hocomoco v12](http://hocomoco12.autosome.ru/) and [ChIP-seq peaks dataset PEAKS039234](https://github.com/parthian-sterlet/motali/blob/main/examples/PEAKS039234_BHLHA15_Q9QYC3_MACS2.fa) for this TF
