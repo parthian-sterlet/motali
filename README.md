@@ -22,7 +22,7 @@ MotAli tool has two parameters:
 - The maximal shift between centers of two motifs, L
   
 # Output data
-- Histogram of AUPRC values as a function of the mutual orientation of two motifs (they either in the same or opposite strands) and the shift between the centers of two motifs
+- Histogram of AUPRC values as a function of the mutual orientation of two motifs (they either in the same or opposite strands) and the shift between the centers of two motifs.
 - List of PR curves for two possible mutual orientations of motifs (Direct and Opposite strands) and shifts, -L <= x <= L, x denotes the shift of one motif relative to another motif.
 - Best similarity score values for (a) the stringent criteria on the overlap of the centers of two motifs, and (b) any higher shifts between centers of two motifs, including their location with spacers and small overlaps. 
 
