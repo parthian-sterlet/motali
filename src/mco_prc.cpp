@@ -327,70 +327,78 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 	int olen_min1 = olen[kmin] - 1;
 	int olen_max1 = olen[kmax] - 1;
 	//int half_wini1[2], half_wini2[2];//int shift of center relative to start
-	double wshift_ov;
-	int n_shift = 2 * shift;
-	int j_ov1, j_ov2;
-	double* wshift;
+	double wshift_ov[3];
+	int n_shift[3]; 
+	for (i = 0; i < 3; i++) n_shift[i] = 2 * shift;
+	int j_ov1[3], j_ov2[3];
+	int kpairs[3][2];
+	kpairs[0][0] = kpairs[1][0] = kpairs[1][1] = kmax;
+	kpairs[0][1] = kpairs[2][0] = kpairs[2][1] = kmin;
+	double** wshift;
+	wshift = new double* [3];
+	for(i = 0; i < 3; i++)
 	{
 		int chet[2];
 		for (k = 0; k < 2; k++)
 		{
-			if (olen[k] % 2 == 0)
+			if (olen[kpairs[i][k]] % 2 == 0)
 			{
-				chet[k] = 1;//4etno
-			//	half_wini1[k] = (olen[k] - 1) / 2;
-			//	half_wini2[k] = half_wini1[k] + 1;
+				chet[k] = 1;//4etno			
 			}
 			else
 			{
-				chet[k] = 0;//ne4etno
-			//	half_wini1[k] = half_wini2[k] = olen[k] / 2;
+				chet[k] = 0;//ne4etno			
 			}
 		}
-		if (chet[0] == chet[1])n_shift++;
+		if (chet[0] == chet[1])n_shift[i]++;
+		int kmax1 = kpairs[i][0];
 		if (chet[0] == chet[1])// -1 0 +1
 		{
-			if (chet[kmax] == 0)wshift_ov = (double)(olen[kmax] - 1) / 2;
-			else wshift_ov = (double)olen[kmax] / 2;
+			if (chet[kmax1] == 0)wshift_ov[i] = (double)(olen[kmax1] - 1) / 2;
+			else wshift_ov[i] = (double)olen[kmax] / 2;
 		}
 		else //-0.5 +0.5
 		{
-			if (chet[kmax] == 1)wshift_ov = (double)olen[kmax] / 2 - 0.5;
-			else wshift_ov = (double)(olen[kmax] - 1) / 2 + 0.5;
+			if (chet[kmax1] == 1)wshift_ov[i] = (double)olen[kmax1] / 2 - 0.5;
+			else wshift_ov[i] = (double)(olen[kmax1] - 1) / 2 + 0.5;
 		}
 		//shift = n_shift / 2;
-		wshift = new double[n_shift];
-		if (wshift == NULL) { fprintf(stderr, "Error: Not of memory..."); return -1; }
+		wshift[i] = new double[n_shift[i]];
+		if (wshift[i] == NULL) { fprintf(stderr, "Error: Not of memory..."); return -1; }
 		if (chet[0] == chet[1])
 		{
-			wshift[0] = -shift;
+			wshift[i][0] = -shift;
 		}
 		else
 		{
-			wshift[0] = 0.5 - shift;
+			wshift[i][0] = 0.5 - shift;
 		}
-		for (k = 1; k < n_shift; k++)wshift[k] = wshift[k - 1] + 1;
-		for (k = 0; k < n_shift; k++)
+		for (k = 1; k < n_shift[i]; k++)wshift[i][k] = wshift[i][k - 1] + 1;
+		for (k = 0; k < n_shift[i]; k++)
 		{
-			if (wshift[k] == -wshift_ov) 
+			if (wshift[i][k] == -wshift_ov[i])
 			{
-				j_ov1 = k; continue;
+				j_ov1[i] = k; continue;
 			}
-			if (wshift[k] == wshift_ov)
+			if (wshift[i][k] == wshift_ov[i])
 			{
-				j_ov2 = k; break;
+				j_ov2[i] = k; break;
 			}
 		}
 	}		
-	double** auprc;
-	auprc = new double* [2];
-	if (auprc == NULL) { fprintf(stderr, "Error: Not of memory..."); return -1; }
-	for (k = 0; k < 2; k++)
+	double*** auprc;
+	auprc = new double** [3];
+	for (j = 0; j < 3; j++)
 	{
-		auprc[k] = new double[n_shift];
-		if (auprc[k] == NULL) { fprintf(stderr, "Error: Not of memory..."); return -1; }
+		auprc[j] = new double* [2];
+		if (auprc[j] == NULL) { fprintf(stderr, "Error: Not of memory..."); return -1; }
+		for (k = 0; k < 2; k++)
+		{
+			auprc[j][k] = new double[n_shift[j]];
+			if (auprc[j][k] == NULL) { fprintf(stderr, "Error: Not of memory..."); return -1; }
+		}		
 	}
-	for (k = 0; k < 2; k++)for (m = 0; m < n_shift; m++)auprc[k][m] = 0;
+	for (j = 0; j < 3; j++)for (k = 0; k < 2; k++)for (m = 0; m < n_shift[j]; m++)auprc[j][k][m] = 0;
 	double half_win[2];//double shift of center relative to start
 	for (k = 0; k < 2; k++)half_win[k] = ((double)olen[k] - 1) / 2;
 	int* inx_self[2];
@@ -427,32 +435,47 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 			cou[model]++;
 		}		
 	}
-	double*** tp, *fp;
-	tp = new double** [2];
-	if (tp == NULL) { puts("Out of memory..."); exit(1); }
-	for (k = 0; k < 2; k++)
+	double**** tp, **fp;
+	tp = new double*** [3];
+	if (tp == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+	for (j = 0; j < 3; j++)
 	{
-		tp[k] = new double* [n_shift];
-		if (tp[k] == NULL) { puts("Out of memory..."); exit(1); }
-		for (i = 0; i < n_shift; i++)
+		tp[j] = new double** [2];
+		if (tp[j] == NULL) { puts("Out of memory..."); exit(1); }
+		for (k = 0; k < 2; k++)
 		{
-			tp[k][i] = new double[nthr_dist_two];
-			if (tp[k][i] == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+			tp[j][k] = new double* [n_shift[j]];
+			if (tp[k] == NULL) { puts("Out of memory..."); exit(1); }
+			for (i = 0; i < n_shift[j]; i++)
+			{
+				tp[j][k][i] = new double[nthr_dist_two];
+				if (tp[j][k][i] == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+			}
 		}
-	}	
-	fp = new double[nthr_dist_two];
-	if (fp == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
-	for (k = 0; k < 2; k++)for (i = 0; i < n_shift; i++)for (j = 0; j < nthr_dist_two; j++)tp[k][i][j] = 0;
-	for (j = 0; j < nthr_dist_two; j++)fp[j] = 0;
-	double** tp_tot, fp_tot = 0;
-	tp_tot = new double* [2];
-	if (tp_tot == NULL) { puts("Out of memory..."); exit(1); }
-	for (k = 0; k < 2; k++)
-	{
-		tp_tot[k] = new double[n_shift];
-		if (tp_tot[k] == NULL) { puts("Out of memory..."); exit(1); }
 	}
-	for (k = 0; k < 2; k++)for (i = 0; i < n_shift; i++)tp_tot[k][i] = 0;
+	for (j = 0; j < 3; j++)for (k = 0; k < 2; k++)for (i = 0; i < n_shift[j]; i++)for (m = 0; m < nthr_dist_two; m++)tp[j][k][i][m] = 0;
+	fp = new double* [3];
+	if (fp == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+	for (j = 0; j < 3; j++) 
+	{
+		fp[j] = new double[nthr_dist_two];
+		if (fp[j] == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+	}	
+	for (j = 0; j < 3; j++)for (m = 0; m < nthr_dist_two; m++)fp[j][m] = 0;
+	double*** tp_tot, fp_tot[3] = { 0,0,0 };
+	tp_tot = new double** [3];
+	if (tp_tot == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+	for (j = 0; j < 3; j++)
+	{
+		tp_tot[j] = new double* [2];
+		if (tp_tot[j] == NULL) { puts("Out of memory..."); exit(1); }
+		for (k = 0; k < 2; k++)
+		{
+			tp_tot[j][k] = new double[n_shift[j]];
+			if (tp_tot[j][k] == NULL) { puts("Out of memory..."); exit(1); }
+		}
+	}
+	for (j = 0; j < 3; j++) for (k = 0; k < 2; k++)for (i = 0; i < n_shift[j]; i++)tp_tot[j][k][i] = 0;
 	int*** err_inx;
 	err_inx = new int** [2];
 	if (err_inx == NULL) { puts("Out of memory..."); exit(1); }	
@@ -567,53 +590,18 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 				if ((i + 1) % 200 == 0)printf("\n");
 			}
 			printf("\n");
-		}	*/		
-		int olen1[2];
-		int n_shift1 = n_shift - 1;
-		for (j = 0; j < 2; j++)olen1[j] = olen[j] - 1;		
-		//spacers		
-		/*for (j = 0; j < 2; j++)
+		}	*/						
+		for(j = 0; j < 3 ; j++)
 		{
-			int j2 = 1 - j;
-			for (m = 0; m <= len21[j]; m++)
-			{
-				int inx1[2];
-				for (k = 0; k < 2; k++)inx1[k] = err_inx[j][k][m];
-				int mini1 = Min(inx1[0], inx1[1]); 
-				if (mini1 == nthr_dist_two)continue;
-				int sole = 1;
-				int is1 = inx_self[j][mini1];
-				if (is1 == nthr_dist_two)continue;
-				int ista = Max(0, m - half_wini1[j2]);
-				int iend = Min(len21[j2], m + olen1[j] - half_wini1[j2]);
-				for (i = ista; i <= iend; i++)
-				{
-					int inx2[2];
-					for (k = 0; k < 2; k++)inx2[k] = err_inx[j2][k][i];
-					int mini2 = Min(inx2[0], inx2[1]);
-					if (mini2 == nthr_dist_two)continue;
-					else
-					{
-						sole = 0; 
-						break;
-					}
-				}
-				if (sole == 1)
-				{
-					for (i = 0; i < n_shift; i++)fp_tot[j][i]++;
-					for (i = 0; i < n_shift; i++)fp[j][i][is1]++;					
-				}				
-			}
-		}*/
-		{
-			j = kmax;
-			int j2 = kmin;
-			for (m = 0; m <= len21[j]; m++)
+			int n_shift1 = n_shift[j] - 1;
+			int j1 = kpairs[j][0];
+			int j2 = kpairs[j][1];
+			for (m = 0; m <= len21[j1]; m++)
 			{				
 				{
-					double cent_win1 = m + half_win[j];
+					double cent_win1 = m + half_win[j1];
 					int inx1[2];
-					for(k = 0; k < 2 ; k++)inx1[k] = err_inx[j][k][m];					
+					for(k = 0; k < 2 ; k++)inx1[k] = err_inx[j1][k][m];					
 					int mini1 = Min(inx1[0], inx1[1]);
 					if (mini1 == nthr_dist_two)continue;
 					for (i = 0; i <= len21[j2]; i++)
@@ -633,45 +621,25 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 								int ori_type;
 								if (ori1 == ori2)ori_type = 0;//Direct
 								else ori_type = 1; //Invert or Evert									
-								int k1 = inx_self[j][inx1[ori1]];
+								int k1 = inx_self[j1][inx1[ori1]];
 								int k2 = inx_self[j2][inx2[ori2]];
-								if (cent_dif >= wshift[0] && cent_dif <= wshift[n_shift1])
+								if (cent_dif >= wshift[j][0] && cent_dif <= wshift[j][n_shift1])
 								{
 									int shift_pos;
-									if (ori1 == 0)shift_pos = (int)(cent_win2 - cent_win1 - wshift[0]);//Direct12 Invert
-									else shift_pos = (int)(cent_win1 - cent_win2 - wshift[0]);//Direct21 Evert
-									tp_tot[ori_type][shift_pos]+=2;
-									tp[ori_type][shift_pos][k1]++;
-									tp[ori_type][shift_pos][k2]++;
-									/*if (k1 <= k2)
-									{
-										tp_tot[ori_type][shift_pos]++;
-										tp[ori_type][shift_pos][k1]++;
-									}
-									else
-									{
-										tp_tot[ori_type][shift_pos]++;
-										tp[ori_type][shift_pos][k2]++;
-									}*/
+									if (ori1 == 0)shift_pos = (int)(cent_win2 - cent_win1 - wshift[j][0]);//Direct12 Invert
+									else shift_pos = (int)(cent_win1 - cent_win2 - wshift[j][0]);//Direct21 Evert
+									tp_tot[j][ori_type][shift_pos]+=2;
+									tp[j][ori_type][shift_pos][k1]++;
+									tp[j][ori_type][shift_pos][k2]++;
 								}
 								else
 								{		
 									double cent_diff = fabs(cent_dif);
-									if(cent_diff <= n_shift)
+									if(cent_diff <= n_shift[j])
 									{
-										fp_tot+=2;
-										fp[k1]++;
-										fp[k2]++;
-										/*if (k1 <= k2)
-										{
-											fp_tot++;
-											fp[k1]++;
-										}
-										else
-										{
-											fp_tot++;
-											fp[k2]++;
-										}*/
+										fp_tot[j] += 2;
+										fp[j][k1]++;
+										fp[j][k2]++;										
 									}
 								}
 							}
@@ -687,135 +655,140 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 		printf("Output file can't be opened!\n");
 		exit(1);
 	}	
-	{		
-		for (i = 0; i < n_shift; i++)
-		{
-			fprintf(out_hist_pr, "\t%.1f",wshift[i]);
-		}
-		fprintf(out_hist_pr, "\n");
-	}
 	FILE* out_prc;
 	if ((out_prc = fopen(file_prc, "wt")) == NULL)
 	{
 		printf("Output file can't be opened!\n");
 		exit(1);
 	}
-	{
-		int del = n_shift * 2;
-		fp_tot /= del;
-		for (j = 0; j < nthr_dist_two; j++)fp[j] /= del;
-	}
-	/*printf("\n");
-	for (k = 0; k < 2; k++)
-	{
-		printf("%d TP\t",k);
-		for (m = 0; m < n_shift; m++)
+	for (j = 0; j < 3; j++)
+	{	
+		if (j == 0)fprintf(out_hist_pr, "Heterotypic\t");
+		else fprintf(out_hist_pr, "Homotypic\t");
+		fprintf(out_hist_pr, "Motif1\t%d\tMotif2\t%d\n", olen[kpairs[j][0]], olen[kpairs[j][1]]);
+		for (i = 0; i < n_shift[j]; i++)
 		{
-			printf("%.f ", tp_tot[k][m]);
+			fprintf(out_hist_pr, "\t%.1f", wshift[j][i]);
 		}
-		printf("\t\t");
-		printf("%d FP\t", k); 
-		//for (m = 0; m < n_shift; m++)
+		fprintf(out_hist_pr, "\n");	
 		{
-			printf("%.f ", fp_tot);
+			int del = n_shift[j] * 2;
+			fp_tot[j] /= del;
+			for (i = 0; i < nthr_dist_two; i++)fp[j][i] /= del;
 		}
-		printf("\n");
-	}	*/
-	/*double* prec_exp[2];
-	for (k = 0; k < 2; k++)prec_exp[k] = new double[nthr_dist_two];
-	if(prec_exp == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
-	for (k = 0; k < 2; k++)for (j = 0; j < nthr_dist_two; j++)prec_exp[k][j] = 0;	
-	for (k = 0; k < 2; k++)
-	{
-		double tp_pred = 0, fp_pred = 0;
-		for (j = 0; j < nthr_dist_two; j++)
+		/*printf("\n");
+		for (k = 0; k < 2; k++)
 		{
-			fp_pred += fp[j];
-			for (i = 0; i < j_ov1; i++)
+			printf("%d TP\t",k);
+			for (m = 0; m < n_shift; m++)
 			{
-				tp_pred += tp[k][i][j];				
+				printf("%.f ", tp_tot[k][m]);
 			}
-			for (i = j_ov2 + 1; i < n_shift; i++)
+			printf("\t\t");
+			printf("%d FP\t", k);
+			//for (m = 0; m < n_shift; m++)
 			{
-				tp_pred += tp[k][i][j];
+				printf("%.f ", fp_tot);
 			}
-			double p_pred = tp_pred + fp_pred;
-			if (p_pred > 0)
+			printf("\n");
+		}	*/
+		/*double* prec_exp[2];
+		for (k = 0; k < 2; k++)prec_exp[k] = new double[nthr_dist_two];
+		if(prec_exp == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+		for (k = 0; k < 2; k++)for (j = 0; j < nthr_dist_two; j++)prec_exp[k][j] = 0;
+		for (k = 0; k < 2; k++)
+		{
+			double tp_pred = 0, fp_pred = 0;
+			for (j = 0; j < nthr_dist_two; j++)
 			{
-				prec_exp[k][j] = tp_pred / (tp_pred + fp_pred);
+				fp_pred += fp[j];
+				for (i = 0; i < j_ov1; i++)
+				{
+					tp_pred += tp[k][i][j];
+				}
+				for (i = j_ov2 + 1; i < n_shift; i++)
+				{
+					tp_pred += tp[k][i][j];
+				}
+				double p_pred = tp_pred + fp_pred;
+				if (p_pred > 0)
+				{
+					prec_exp[k][j] = tp_pred / (tp_pred + fp_pred);
+				}
+				else prec_exp[k][j] = -1;
 			}
-			else prec_exp[k][j] = -1;
 		}
-	}
-	*/
-	for (k = 0; k < 2; k++)
-	{
-		if (k == 0)
+		*/
+		for (k = 0; k < 2; k++)
 		{
-			fprintf(out_hist_pr, "Direct ShortLong,LongShort");			
-		}
-		else
-		{
-			fprintf(out_hist_pr, "Evered Inverted");			
-		}
-		for (m = 0; m < n_shift; m++)
-		{
+			if (j == 0)fprintf(out_prc, "Heterotypic\t");
+			else fprintf(out_prc, "Homotypic\t");
+			fprintf(out_prc, "Motif1\t%d\tMotif2\t%d\n", olen[kpairs[j][0]], olen[kpairs[j][1]]);
 			if (k == 0)
 			{
-				if(wshift[m] < 0)fprintf(out_prc, "\tDirect ShortLong");
-				else
-				{
-					if (wshift[m] > 0)fprintf(out_prc, "\tDirect LongShort"); 
-					else fprintf(out_prc, "\tDirect Exact");
-				}
+				fprintf(out_hist_pr, "Direct ShortLong,LongShort");
 			}
 			else
 			{
-				if (wshift[m] < 0)fprintf(out_prc, "\tEverted");
-				else
-				{
-					if (wshift[m] > 0)fprintf(out_prc, "\tInverted");
-					else fprintf(out_prc, "\tReverse Exact");
-				}
+				fprintf(out_hist_pr, "Evered Inverted");
 			}
-			fprintf(out_prc, " %.1f\n",wshift[m]);			
+			for (m = 0; m < n_shift[j]; m++)
 			{
-				int nthr_dist_two1 = nthr_dist_two - 1;
-				double tpr_pred = 0, prec_pred = 1, tpr = 0;
-				double dtp = 0, dfp = 0;
-				double prec_exp1 = tp_tot[k][m] / (tp_tot[k][m] + fp_tot);
-				int count_pr = 0, count_roc = 0;
-				double tp_sum = 0, fp_sum = 0;
-				fprintf(out_prc, "%f\t%f\n", tpr_pred, prec_pred);
-				for (i = 0; i < nthr_dist_two; i++)
+				if (k == 0)
 				{
-				//	if (prec_exp[k][i] == -1)continue;
-					dtp += tp[k][m][i];
-					dfp += fp[i];
-					if (dtp > 0 && (i == nthr_dist_two1 || errs[i + 1].err != errs[i].err))
+					if (wshift[j][m] < 0)fprintf(out_prc, "\tDirect ShortLong");
+					else
 					{
-						tp_sum += dtp;
-						fp_sum += dfp;
-						double prec_cur = tp_sum / (tp_sum + fp_sum);
-						tpr = tp_sum / tp_tot[k][m];						
-						double prec_av = (prec_pred + prec_cur) / 2;
-						double dauprc = dtp * prec_av / tp_tot[k][m];
-						//double dauprc = dtp * (prec_av - prec_exp[k][i]) / 2 / tp_tot[k][m];
-						//fprintf(out_prc, "%f\t%f\t%f\n", tpr, prec_cur, prec_av - prec_exp[k][i]);
-						fprintf(out_prc, "%f\t%f\n", tpr, prec_cur);
-						prec_pred = prec_cur;
-						tpr_pred = tpr;
-						auprc[k][m] += dauprc;
-						dtp = 0;
-						dfp = 0;
-						count_pr++;
+						if (wshift[j][m] > 0)fprintf(out_prc, "\tDirect LongShort");
+						else fprintf(out_prc, "\tDirect Exact");
 					}
 				}
+				else
+				{
+					if (wshift[j][m] < 0)fprintf(out_prc, "\tEverted");
+					else
+					{
+						if (wshift[j][m] > 0)fprintf(out_prc, "\tInverted");
+						else fprintf(out_prc, "\tReverse Exact");
+					}
+				}
+				fprintf(out_prc, " %.1f\n", wshift[j][m]);
+				{
+					int nthr_dist_two1 = nthr_dist_two - 1;
+					double tpr_pred = 0, prec_pred = 1, tpr = 0;
+					double dtp = 0, dfp = 0;					
+					int count_pr = 0, count_roc = 0;
+					double tp_sum = 0, fp_sum = 0;
+					fprintf(out_prc, "%f\t%f\n", tpr_pred, prec_pred);
+					for (i = 0; i < nthr_dist_two; i++)
+					{						
+						dtp += tp[j][k][m][i];
+						dfp += fp[j][i];
+						if (dtp > 0 && (i == nthr_dist_two1 || errs[i + 1].err != errs[i].err))
+						{
+							tp_sum += dtp;
+							fp_sum += dfp;
+							double prec_cur = tp_sum / (tp_sum + fp_sum);
+							tpr = tp_sum / tp_tot[j][k][m];
+							double prec_av = (prec_pred + prec_cur) / 2;
+							double dauprc = dtp * prec_av / tp_tot[j][k][m];
+							//double dauprc = dtp * (prec_av - prec_exp[k][i]) / 2 / tp_tot[k][m];
+							//fprintf(out_prc, "%f\t%f\t%f\n", tpr, prec_cur, prec_av - prec_exp[k][i]);
+							fprintf(out_prc, "%f\t%f\n", tpr, prec_cur);
+							prec_pred = prec_cur;
+							tpr_pred = tpr;
+							auprc[j][k][m] += dauprc;
+							dtp = 0;
+							dfp = 0;
+							count_pr++;
+						}
+					}
+				}
+				fprintf(out_hist_pr, "\t%f", auprc[j][k][m]);
 			}
-			fprintf(out_hist_pr, "\t%f", auprc[k][m]);			
+			fprintf(out_hist_pr, "\n");
 		}
-		fprintf(out_hist_pr, "\n");		
-	}
+	}	
 	fclose(out_prc);	
 	fclose(out_hist_pr);	
 	/*for (k = 0; k < 2; k++)
@@ -836,33 +809,39 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 		}
 		printf("\n");
 	}*/
-	double auprc_max[2] = { 0,0 };
-	double auprc_ov[2] = { 0,0 };
-	int j_best[2] = { 0,0 };
-	int j_ov[2] = { 0,0 };	
+	double auprc_max[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
+	double auprc_ov[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
+	int j_best[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
+	int j_ov[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
+	double auprc_final_all[3];
+	double auprc_final_over[3];
+	char strand_final_all[3], strand_final_over[3];
+	double shift_final_all[3], shift_final_over[3];
+
+	for (j = 0; j < 3; j++)
 	{
-		for (j = 0; j < n_shift; j++)
+		for (i = 0; i < n_shift[j]; i++)
 		{
-			if (wshift[j] >= -wshift_ov && wshift[j] <= wshift_ov)
+			if (wshift[j][i] >= -wshift_ov[j] && wshift[j][i] <= wshift_ov[j])
 			{
 				for (k = 0; k < 2; k++)
 				{
-					if (auprc[k][j] > auprc_ov[k])
+					if (auprc[j][k][i] > auprc_ov[j][k])
 					{
-						auprc_ov[k] = auprc[k][j];
-						j_ov[k] = j;
+						auprc_ov[j][k] = auprc[j][k][i];
+						j_ov[j][k] = i;
 					}
 				}
 			}
 		}
-		for (j = 0; j < n_shift; j++)
+		for (i = 0; i < n_shift[j]; i++)
 		{
 			for (k = 0; k < 2; k++)
 			{
-				if (auprc[k][j] > auprc_max[k])
+				if (auprc[j][k][i] > auprc_max[j][k])
 				{
-					auprc_max[k] = auprc[k][j];
-					j_best[k] = j;
+					auprc_max[j][k] = auprc[j][k][i];
+					j_best[j][k] = i;
 				}
 			}
 		}
@@ -871,32 +850,37 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 		printf("AUPRC All Direct %f\t Reverse %f\t\tOverlap Direct %f\t Reverse %f\n", auprc_max[0], auprc_max[1], auprc_ov[0], auprc_ov[1]);
 		printf("Shift All Direct %.1f\tReverse %.1f\t\tOverlap Direct %.1f\t Reverse %.1f\n", wshift[j_best[0]], wshift[j_best[1]], wshift[j_ov[0]], wshift[j_ov[1]]);
 	}*/
-	double auprc_final_all = Max(auprc_max[0], auprc_max[1]);
-	double auprc_final_over = Max(auprc_ov[0], auprc_ov[1]);
-	char strand_final_all, strand_final_over;
-	double shift_final_all, shift_final_over;
+	for (j = 0; j < 3; j++)
 	{
-		if (auprc_max[0] >= auprc_max[1])
+		auprc_final_all[j] = Max(auprc_max[j][0], auprc_max[j][1]);
+		auprc_final_over[j] = Max(auprc_ov[j][0], auprc_ov[j][1]);
+		if (auprc_max[j][0] >= auprc_max[j][1])
 		{
-			strand_final_all = '+';
-			shift_final_all = wshift[j_best[0]];
+			strand_final_all[j] = '+';
+			shift_final_all[j] = wshift[j][j_best[j][0]];
 		}
 		else
 		{
-			strand_final_all = '-';
-			shift_final_all = wshift[j_best[1]];
+			strand_final_all[j] = '-';
+			shift_final_all[j] = wshift[j][j_best[j][1]];
 		}
-		if (auprc_ov[0] >= auprc_ov[1])
+		if (auprc_ov[j][0] >= auprc_ov[j][1])
 		{
-			strand_final_over = '+';
-			shift_final_over = wshift[j_ov[0]];
+			strand_final_over[j] = '+';
+			shift_final_over[j] = wshift[j][j_ov[j][0]];
 		}
 		else
 		{
-			strand_final_over = '-';
-			shift_final_over = wshift[j_ov[1]];
+			strand_final_over[j] = '-';
+			shift_final_over[j] = wshift[j][j_ov[j][1]];
 		}
 	}
+	double maxi = Max(auprc_final_over[1], auprc_final_over[2]);
+	double auprc_final_over1 = auprc_final_over[0] / maxi;
+	if (auprc_final_over1 > 1)auprc_final_over1 = 1;
+	maxi = Max(auprc_final_all[1], auprc_final_all[2]);
+	double auprc_final_all1 = auprc_final_all[0] / maxi;
+	if (auprc_final_all1 > 1)auprc_final_all1 = 1;
 	FILE* out_sta;
 	if ((out_sta = fopen(file_sta, "at")) == NULL)
 	{
@@ -904,8 +888,17 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 		exit(1);
 	}
 	fprintf(out_sta, "%s\t%s\t", file_model1, file_model2);
-	fprintf(out_sta,"Overlap\t%f\t%.1f\t%c\t", auprc_final_over, shift_final_over, strand_final_over);
-	fprintf(out_sta, "All\t%f\t%.1f\t%c\n", auprc_final_all, shift_final_all, strand_final_all);	
+	fprintf(out_sta, "Overlap\t%f\t", auprc_final_over1);
+	fprintf(out_sta, "All\t%f\t", auprc_final_all1);
+	for (j = 0; j < 3; j++)fprintf(out_sta,"\t%1f", auprc_final_over[j]);	
+	for (j = 0; j < 3; j++)fprintf(out_sta, "\t%.1f", shift_final_over[j]);
+	fprintf(out_sta, "\t");
+	for (j = 0; j < 3; j++)fprintf(out_sta, "%c", strand_final_over[j]);
+	for (j = 0; j < 3; j++)fprintf(out_sta, "\t%1f", auprc_final_all[j]);
+	for (j = 0; j < 3; j++)fprintf(out_sta, "\t%.1f", shift_final_all[j]);
+	fprintf(out_sta, "\t");
+	for (j = 0; j < 3; j++)fprintf(out_sta, "%c", strand_final_all[j]);
+	fprintf(out_sta, "\n");
 	fclose(out_sta);
 	delete[] errs;
 	for (k = 0; k < 2; k++)
@@ -917,25 +910,38 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 		delete[] err_inx[k];
 	}
 	delete[] err_inx;
-	for (k = 0; k < 2; k++)
+	for (j = 0; j < 3; j++)
 	{
-		for (i = 0; i < n_shift; i++)delete[] tp[k][i];
-		delete[] tp[k];
-	}
+		for (k = 0; k < 2; k++)
+		{
+			for (i = 0; i < n_shift[j]; i++)delete[] tp[j][k][i];
+			delete[] tp[j][k];
+		}
+		delete[] tp[j];
+	}	
 	delete[] tp;
+	for (j = 0; j < 3; j++)delete[] fp[j];
 	delete[] fp;
-	for (k = 0; k < 2; k++)delete[] tp_tot[k];
-	delete[] tp_tot;
-	//for (k = 0; k < 2; k++)delete[] prec_exp[k];	
-	for (k = 0; k < 2; k++)
+	for (j = 0; j < 3; j++)
 	{
-		delete[] auprc[k];
+		for (k = 0; k < 2; k++)delete[] tp_tot[j][k];
+		delete[] tp_tot[j];
+	}
+	delete[] tp_tot;
+	for (j = 0; j < 3; j++)
+	{
+		for (k = 0; k < 2; k++)
+		{
+			delete[] auprc[j][k];
+		}
+		delete[] auprc[j];
 	}
 	delete[] auprc;
 	for (k = 0; k < 2; k++)
 	{
 		delete[] inx_self[k];
 	}	
+	for (j = 0; j < 3; j++)delete[] wshift[j];
 	delete[] wshift;
 	return 1;
 }
@@ -1176,3 +1182,5 @@ int main(int argc, char* argv[])
 	delete[] pwm;
 	return 0;
 }
+
+
