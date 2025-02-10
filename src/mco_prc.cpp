@@ -102,7 +102,7 @@ int ComplStr(char* d)
 	d1 = new char[len + 1];
 	if (d1 == NULL)
 	{
-		fprintf(stderr, "Error: Out of memory...");
+		fprintf(stderr, "Cmpl: Out of memory...");
 		return 0;
 	}
 	strcpy(d1, d);
@@ -311,8 +311,8 @@ void PWMScore(double **pwm, double& min, double& raz, int len1)
 	}
 	raz -= min;
 }
-int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], int model_type[2], int nthr_dist[2], double** thr_all, double** fpr_all, char*** seq,
-	int olen[2], int nseq, int shift, int length_fasta_max, char* file_model1, char* file_model2, char *file_hist, char* file_prc, char* file_sta)
+int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], int model_type[2], int nthr_dist[2], double** thr_all, double** fpr_all, char*** seq, int olen[2], int nseq,
+	int shift, int length_fasta_max, char* file_model1, char* file_model2, char *file_hist, char* file_prc, char* file_sta, int yes_out_hist, int yes_out_prc, int long_out_sta)
 {
 	int i, j, k, n, m;	
 	int compl1, kmin, kmax;
@@ -323,10 +323,7 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 	double thr_cr[2];
 	int nthr_dist_two = nthr_dist[0] + nthr_dist[1];		
 	if (olen[0] < olen[1]) { kmin = 0; kmax = 1; }
-	else { kmin = 1; kmax = 0; }
-	int olen_min1 = olen[kmin] - 1;
-	int olen_max1 = olen[kmax] - 1;
-	//int half_wini1[2], half_wini2[2];//int shift of center relative to start
+	else { kmin = 1; kmax = 0; }	
 	double wshift_ov[3];
 	int n_shift[3]; 
 	for (i = 0; i < 3; i++) n_shift[i] = 2 * shift;
@@ -338,29 +335,24 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 	wshift = new double* [3];
 	for(i = 0; i < 3; i++)
 	{
+		int kk[2];
 		int chet[2];
 		for (k = 0; k < 2; k++)
 		{
-			if (olen[kpairs[i][k]] % 2 == 0)
-			{
-				chet[k] = 1;//4etno			
-			}
-			else
-			{
-				chet[k] = 0;//ne4etno			
-			}
+			kk[k] = kpairs[i][k];
+			if (olen[kk[k]] % 2 == 0)chet[k] = 1;//4etno			
+			else chet[k] = 0;//ne4etno			
 		}
-		if (chet[0] == chet[1])n_shift[i]++;
-		int kmax1 = kpairs[i][0];
+		if (chet[0] == chet[1])n_shift[i]++;		
 		if (chet[0] == chet[1])// -1 0 +1
 		{
-			if (chet[kmax1] == 0)wshift_ov[i] = (double)(olen[kmax1] - 1) / 2;
-			else wshift_ov[i] = (double)olen[kmax] / 2;
+			if (chet[0] == 0)wshift_ov[i] = (double)(olen[kk[0]] - 1) / 2;
+			else wshift_ov[i] = (double)olen[kk[0]] / 2;
 		}
 		else //-0.5 +0.5
 		{
-			if (chet[kmax1] == 1)wshift_ov[i] = (double)olen[kmax1] / 2 - 0.5;
-			else wshift_ov[i] = (double)(olen[kmax1] - 1) / 2 + 0.5;
+			if (chet[kk[0]] == 1)wshift_ov[i] = (double)olen[kk[0]] / 2 - 0.5;
+			else wshift_ov[i] = (double)(olen[kk[0]] - 1) / 2 + 0.5;
 		}
 		//shift = n_shift / 2;
 		wshift[i] = new double[n_shift[i]];
@@ -405,12 +397,12 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 	for (k = 0; k < 2; k++)
 	{
 		inx_self[k] = new int[nthr_dist[k]];
-		if (inx_self[k] == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+		if (inx_self[k] == NULL) { fprintf(stderr, "Inx_self Out of memory..."); return -1; }
 	}
 	for (k = 0; k < 2; k++)for (i = 0; i < nthr_dist[k]; i++)inx_self[k][i] = nthr_dist_two;
 	qbs* errs;
 	errs = new qbs[nthr_dist_two];
-	if (errs == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+	if (errs == NULL) { fprintf(stderr, "Inx_self Out of memory..."); return -1; }
 	j = 0;
 	for (k = 0; k < 2; k++)
 	{
@@ -437,56 +429,56 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 	}
 	double**** tp, **fp;
 	tp = new double*** [3];
-	if (tp == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+	if (tp == NULL) { fprintf(stderr, "TP Out of memory..."); return -1; }
 	for (j = 0; j < 3; j++)
 	{
 		tp[j] = new double** [2];
-		if (tp[j] == NULL) { puts("Out of memory..."); exit(1); }
+		if (tp[j] == NULL) { puts("TP Out of memory..."); exit(1); }
 		for (k = 0; k < 2; k++)
 		{
 			tp[j][k] = new double* [n_shift[j]];
-			if (tp[k] == NULL) { puts("Out of memory..."); exit(1); }
+			if (tp[k] == NULL) { puts("TP Out of memory..."); exit(1); }
 			for (i = 0; i < n_shift[j]; i++)
 			{
 				tp[j][k][i] = new double[nthr_dist_two];
-				if (tp[j][k][i] == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+				if (tp[j][k][i] == NULL) { fprintf(stderr, "TP  Out of memory..."); return -1; }
 			}
 		}
 	}
 	for (j = 0; j < 3; j++)for (k = 0; k < 2; k++)for (i = 0; i < n_shift[j]; i++)for (m = 0; m < nthr_dist_two; m++)tp[j][k][i][m] = 0;
 	fp = new double* [3];
-	if (fp == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+	if (fp == NULL) { fprintf(stderr, "FP Out of memory..."); return -1; }
 	for (j = 0; j < 3; j++) 
 	{
 		fp[j] = new double[nthr_dist_two];
-		if (fp[j] == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+		if (fp[j] == NULL) { fprintf(stderr, "FP Out of memory..."); return -1; }
 	}	
 	for (j = 0; j < 3; j++)for (m = 0; m < nthr_dist_two; m++)fp[j][m] = 0;
 	double*** tp_tot, fp_tot[3] = { 0,0,0 };
 	tp_tot = new double** [3];
-	if (tp_tot == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+	if (tp_tot == NULL) { fprintf(stderr, "TP_tot Out of memory..."); return -1; }
 	for (j = 0; j < 3; j++)
 	{
 		tp_tot[j] = new double* [2];
-		if (tp_tot[j] == NULL) { puts("Out of memory..."); exit(1); }
+		if (tp_tot[j] == NULL) { puts("TP_tot Out of memory..."); exit(1); }
 		for (k = 0; k < 2; k++)
 		{
 			tp_tot[j][k] = new double[n_shift[j]];
-			if (tp_tot[j][k] == NULL) { puts("Out of memory..."); exit(1); }
+			if (tp_tot[j][k] == NULL) { puts("TP_tot Out of memory..."); exit(1); }
 		}
 	}
 	for (j = 0; j < 3; j++) for (k = 0; k < 2; k++)for (i = 0; i < n_shift[j]; i++)tp_tot[j][k][i] = 0;
 	int*** err_inx;
 	err_inx = new int** [2];
-	if (err_inx == NULL) { puts("Out of memory..."); exit(1); }	
+	if (err_inx == NULL) { puts("Err_inx Out of memory..."); exit(1); }	
 	for (k = 0; k < 2; k++)
 	{
 		err_inx[k] = new int* [2];
-		if (err_inx[k] == NULL) { puts("Out of memory..."); exit(1); }
+		if (err_inx[k] == NULL) { puts("Err_inx Out of memory..."); exit(1); }
 		for (i = 0; i < 2; i++)
 		{
 			err_inx[k][i] = new int[length_fasta_max];
-			if (err_inx[k][i] == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+			if (err_inx[k][i] == NULL) { fprintf(stderr, "Err_inx Out of memory..."); return -1; }
 		}
 	}
 	for (k = 0; k < 2; k++)for (i = 0; i < 2; i++)for (j = 0; j < length_fasta_max; j++)err_inx[k][i][j] = nthr_dist_two;
@@ -649,28 +641,39 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 			}
 		}
 	}		
-	FILE* out_hist_pr;
-	if ((out_hist_pr = fopen(file_hist, "wt")) == NULL)
-	{
-		printf("Output file can't be opened!\n");
-		exit(1);
-	}	
+	FILE* out_hist;
 	FILE* out_prc;
-	if ((out_prc = fopen(file_prc, "wt")) == NULL)
+	out_hist = NULL;
+	out_prc = NULL;
+	if (yes_out_hist == 1)
 	{
-		printf("Output file can't be opened!\n");
-		exit(1);
+		if ((out_hist = fopen(file_hist, "wt")) == NULL)
+		{
+			printf("Output file can't be opened!\n");
+			exit(1);
+		}
+	}
+	if (yes_out_prc == 1)
+	{
+		if ((out_prc = fopen(file_prc, "wt")) == NULL)
+		{
+			printf("Output file can't be opened!\n");
+			exit(1);
+		}
 	}
 	for (j = 0; j < 3; j++)
 	{	
-		if (j == 0)fprintf(out_hist_pr, "Heterotypic\t");
-		else fprintf(out_hist_pr, "Homotypic\t");
-		fprintf(out_hist_pr, "Motif1\t%d\tMotif2\t%d\n", olen[kpairs[j][0]], olen[kpairs[j][1]]);
-		for (i = 0; i < n_shift[j]; i++)
+		if (yes_out_hist == 1)
 		{
-			fprintf(out_hist_pr, "\t%.1f", wshift[j][i]);
-		}
-		fprintf(out_hist_pr, "\n");	
+			if (j == 0)fprintf(out_hist, "Heterotypic\t");
+			else fprintf(out_hist, "Homotypic\t");
+			fprintf(out_hist, "Motif1\t%d\tMotif2\t%d\n", olen[kpairs[j][0]], olen[kpairs[j][1]]);
+			for (i = 0; i < n_shift[j]; i++)
+			{
+				fprintf(out_hist, "\t%.1f", wshift[j][i]);
+			}
+			fprintf(out_hist, "\n");
+		}		
 		{
 			int del = n_shift[j] * 2;
 			fp_tot[j] /= del;
@@ -692,74 +695,53 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 			}
 			printf("\n");
 		}	*/
-		/*double* prec_exp[2];
-		for (k = 0; k < 2; k++)prec_exp[k] = new double[nthr_dist_two];
-		if(prec_exp == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
-		for (k = 0; k < 2; k++)for (j = 0; j < nthr_dist_two; j++)prec_exp[k][j] = 0;
 		for (k = 0; k < 2; k++)
 		{
-			double tp_pred = 0, fp_pred = 0;
-			for (j = 0; j < nthr_dist_two; j++)
+			if (yes_out_prc == 1)
 			{
-				fp_pred += fp[j];
-				for (i = 0; i < j_ov1; i++)
-				{
-					tp_pred += tp[k][i][j];
-				}
-				for (i = j_ov2 + 1; i < n_shift; i++)
-				{
-					tp_pred += tp[k][i][j];
-				}
-				double p_pred = tp_pred + fp_pred;
-				if (p_pred > 0)
-				{
-					prec_exp[k][j] = tp_pred / (tp_pred + fp_pred);
-				}
-				else prec_exp[k][j] = -1;
-			}
-		}
-		*/
-		for (k = 0; k < 2; k++)
-		{
-			if (j == 0)fprintf(out_prc, "Heterotypic\t");
-			else fprintf(out_prc, "Homotypic\t");
-			fprintf(out_prc, "Motif1\t%d\tMotif2\t%d\n", olen[kpairs[j][0]], olen[kpairs[j][1]]);
-			if (k == 0)
-			{
-				fprintf(out_hist_pr, "Direct ShortLong,LongShort");
-			}
-			else
-			{
-				fprintf(out_hist_pr, "Evered Inverted");
-			}
-			for (m = 0; m < n_shift[j]; m++)
-			{
+				if (j == 0)fprintf(out_prc, "Heterotypic\t");
+				else fprintf(out_prc, "Homotypic\t");
+				fprintf(out_prc, "Motif1\t%d\tMotif2\t%d\n", olen[kpairs[j][0]], olen[kpairs[j][1]]);
 				if (k == 0)
 				{
-					if (wshift[j][m] < 0)fprintf(out_prc, "\tDirect ShortLong");
-					else
-					{
-						if (wshift[j][m] > 0)fprintf(out_prc, "\tDirect LongShort");
-						else fprintf(out_prc, "\tDirect Exact");
-					}
+					fprintf(out_hist, "Direct ShortLong,LongShort");
 				}
 				else
 				{
-					if (wshift[j][m] < 0)fprintf(out_prc, "\tEverted");
+					fprintf(out_hist, "Evered Inverted");
+				}
+			}			
+			for (m = 0; m < n_shift[j]; m++)
+			{
+				if (yes_out_prc == 1)
+				{
+					if (k == 0)
+					{
+						if (wshift[j][m] < 0)fprintf(out_prc, "\tDirect ShortLong");
+						else
+						{
+							if (wshift[j][m] > 0)fprintf(out_prc, "\tDirect LongShort");
+							else fprintf(out_prc, "\tDirect Exact");
+						}
+					}
 					else
 					{
-						if (wshift[j][m] > 0)fprintf(out_prc, "\tInverted");
-						else fprintf(out_prc, "\tReverse Exact");
+						if (wshift[j][m] < 0)fprintf(out_prc, "\tEverted");
+						else
+						{
+							if (wshift[j][m] > 0)fprintf(out_prc, "\tInverted");
+							else fprintf(out_prc, "\tReverse Exact");
+						}
 					}
-				}
-				fprintf(out_prc, " %.1f\n", wshift[j][m]);
+					fprintf(out_prc, " %.1f\n", wshift[j][m]);
+				}				
 				{
 					int nthr_dist_two1 = nthr_dist_two - 1;
 					double tpr_pred = 0, prec_pred = 1, tpr = 0;
 					double dtp = 0, dfp = 0;					
 					int count_pr = 0, count_roc = 0;
 					double tp_sum = 0, fp_sum = 0;
-					fprintf(out_prc, "%f\t%f\n", tpr_pred, prec_pred);
+					if (yes_out_prc == 1)fprintf(out_prc, "%f\t%f\n", tpr_pred, prec_pred);
 					for (i = 0; i < nthr_dist_two; i++)
 					{						
 						dtp += tp[j][k][m][i];
@@ -771,10 +753,8 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 							double prec_cur = tp_sum / (tp_sum + fp_sum);
 							tpr = tp_sum / tp_tot[j][k][m];
 							double prec_av = (prec_pred + prec_cur) / 2;
-							double dauprc = dtp * prec_av / tp_tot[j][k][m];
-							//double dauprc = dtp * (prec_av - prec_exp[k][i]) / 2 / tp_tot[k][m];
-							//fprintf(out_prc, "%f\t%f\t%f\n", tpr, prec_cur, prec_av - prec_exp[k][i]);
-							fprintf(out_prc, "%f\t%f\n", tpr, prec_cur);
+							double dauprc = dtp * prec_av / tp_tot[j][k][m];														
+							if (yes_out_prc == 1)fprintf(out_prc, "%f\t%f\n", tpr, prec_cur);
 							prec_pred = prec_cur;
 							tpr_pred = tpr;
 							auprc[j][k][m] += dauprc;
@@ -784,31 +764,13 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 						}
 					}
 				}
-				fprintf(out_hist_pr, "\t%f", auprc[j][k][m]);
+				if (yes_out_hist == 1)fprintf(out_hist, "\t%f", auprc[j][k][m]);
 			}
-			fprintf(out_hist_pr, "\n");
+			if (yes_out_hist == 1)fprintf(out_hist, "\n");
 		}
 	}	
-	fclose(out_prc);	
-	fclose(out_hist_pr);	
-	/*for (k = 0; k < 2; k++)
-	{
-		printf("PR %d", k);
-		for (m = 0; m < n_shift; m++)
-		{
-			printf("\t%f", auprc[k][m]);
-		}
-		printf("\n");
-	}
-	for (k = 0; k < 2; k++)
-	{
-		printf("ROC %d", k);
-		for (m = 0; m < n_shift; m++)
-		{
-			printf("\t%f", auroc[k][m]);
-		}
-		printf("\n");
-	}*/
+	if (yes_out_prc == 1)fclose(out_prc);
+	if (yes_out_hist == 1)fclose(out_hist);	
 	double auprc_max[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
 	double auprc_ov[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
 	int j_best[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
@@ -846,10 +808,6 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 			}
 		}
 	}
-	/*{		
-		printf("AUPRC All Direct %f\t Reverse %f\t\tOverlap Direct %f\t Reverse %f\n", auprc_max[0], auprc_max[1], auprc_ov[0], auprc_ov[1]);
-		printf("Shift All Direct %.1f\tReverse %.1f\t\tOverlap Direct %.1f\t Reverse %.1f\n", wshift[j_best[0]], wshift[j_best[1]], wshift[j_ov[0]], wshift[j_ov[1]]);
-	}*/
 	for (j = 0; j < 3; j++)
 	{
 		auprc_final_all[j] = Max(auprc_max[j][0], auprc_max[j][1]);
@@ -886,19 +844,25 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 	{
 		printf("Output file can't be opened!\n");
 		exit(1);
+	}	
+	if (long_out_sta == 1)
+	{
+		fprintf(out_sta, "%s\t%s\t", file_model1, file_model2);
+		fprintf(out_sta, "Overlap\t%f\t", auprc_final_over1);
+		fprintf(out_sta, "All\t%f\t", auprc_final_all1);
+		//overap
+		for (j = 0; j < 3; j++)fprintf(out_sta, "\t%f", auprc_final_over[j]);
+		for (j = 0; j < 3; j++)fprintf(out_sta, "\t%.1f", shift_final_over[j]);
+		fprintf(out_sta, "\t");
+		for (j = 0; j < 3; j++)fprintf(out_sta, "%c", strand_final_over[j]);
+		//all
+		for (j = 0; j < 3; j++)fprintf(out_sta, "\t%f", auprc_final_all[j]);
+		for (j = 0; j < 3; j++)fprintf(out_sta, "\t%.1f", shift_final_all[j]);
+		fprintf(out_sta, "\t");
+		for (j = 0; j < 3; j++)fprintf(out_sta, "%c", strand_final_all[j]);
+		fprintf(out_sta, "\n");
 	}
-	fprintf(out_sta, "%s\t%s\t", file_model1, file_model2);
-	fprintf(out_sta, "Overlap\t%f\t", auprc_final_over1);
-	fprintf(out_sta, "All\t%f\t", auprc_final_all1);
-	for (j = 0; j < 3; j++)fprintf(out_sta,"\t%1f", auprc_final_over[j]);	
-	for (j = 0; j < 3; j++)fprintf(out_sta, "\t%.1f", shift_final_over[j]);
-	fprintf(out_sta, "\t");
-	for (j = 0; j < 3; j++)fprintf(out_sta, "%c", strand_final_over[j]);
-	for (j = 0; j < 3; j++)fprintf(out_sta, "\t%1f", auprc_final_all[j]);
-	for (j = 0; j < 3; j++)fprintf(out_sta, "\t%.1f", shift_final_all[j]);
-	fprintf(out_sta, "\t");
-	for (j = 0; j < 3; j++)fprintf(out_sta, "%c", strand_final_all[j]);
-	fprintf(out_sta, "\n");
+	else fprintf(out_sta, "\t%f", auprc_final_over1);
 	fclose(out_sta);
 	delete[] errs;
 	for (k = 0; k < 2; k++)
@@ -982,10 +946,10 @@ int main(int argc, char* argv[])
 	city sta[2];	
 	int model_type[2] = { -1,-1 };// 0 pwm 1 sga
 	
-	if (argc != 13)
+	if (argc != 16)
 	{
-		fprintf(stderr, "Syntax error: %s 1file_fasta 2motif1_type 3motif2_type 4file_motif1_matrix 5file_motif2_matrix 6file_motif1_table 7file_motif2_table ", argv[0]);
-		fprintf(stderr, "8int max_shift_of_motif_centers 9double pvalue_thr 10file out_hist 11file_out_prc 12 file_out_sta\n");
+		fprintf(stderr, "Syntax error: %s 1file_fasta 2motif1_type 3motif2_type 4file_motif1_matrix 5file_motif2_matrix 6file_motif1_table 7file_motif2_table 8int max_shift_of_motif_centers", argv[0]);
+		fprintf(stderr, "9double pvalue_thr 10file out_hist 11file_out_prc 12 file_out_sta 13int 1yes,0no out_hist 14int 1yes,0no out_prc 15int 0short 1long sta out\n");
 		return -1;
 	}
 	strcpy(file_fasta, argv[1]);	
@@ -1001,6 +965,9 @@ int main(int argc, char* argv[])
 	strcpy(file_hist, argv[10]);
 	strcpy(file_prc, argv[11]);
 	strcpy(file_sta, argv[12]);
+	int yes_out_hist = atoi(argv[13]);
+	int yes_out_prc = atoi(argv[14]);
+	int long_out_sta = atoi(argv[15]);
 
 	{
 		char pwm1[] = "pwm", pwm2[] = "PWM", sga1[] = "sga", sga2[] = "SGA";
@@ -1053,15 +1020,15 @@ int main(int argc, char* argv[])
 		}
 	}
 	pwm = new double** [2];
-	if (pwm == NULL) { fprintf(stderr, "Error: Not of memory..."); return -1; }
+	if (pwm == NULL) { fprintf(stderr, "PWM Out of memory..."); return -1; }
 	for (k = 0; k < 2; k++)
 	{
 		pwm[k] = new double* [MATLEN];
-		if (pwm[k] == NULL) { fprintf(stderr, "Error: Not of memory..."); return -1; }
+		if (pwm[k] == NULL) { fprintf(stderr, "PWM Out of memory..."); return -1; }
 		for (i = 0; i < MATLEN; i++)
 		{			
 			pwm[k][i] = new double[OLIGNUM];
-			if (pwm[k][i] == NULL) { fprintf(stderr, "Error: Not of memory..."); return -1; }			
+			if (pwm[k][i] == NULL) { fprintf(stderr, "PWM Out of memory..."); return -1; }			
 		}
 	}
 
@@ -1077,10 +1044,10 @@ int main(int argc, char* argv[])
 	
 	double** thr_all;
 	thr_all = new double* [2];
-	if (thr_all == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }
+	if (thr_all == NULL) { fprintf(stderr, "Thr_all Out of memory..."); return -1; }
 	double** fpr_all;
 	fpr_all = new double* [2];
-	if (fpr_all == NULL) { fprintf(stderr, "Error: Out of memory..."); return -1; }		
+	if (fpr_all == NULL) { fprintf(stderr, "Thr_all Out of memory..."); return -1; }		
 	for (mot = 0; mot < 2; mot++)
 	{
 		//printf("Mot %d\n", mot);
@@ -1109,9 +1076,9 @@ int main(int argc, char* argv[])
 		}
 		rewind(in_tab);		
 		thr_all[mot] = new double[nthr_dist[mot]];
-		if (thr_all[mot] == NULL) { puts("Out of memory..."); return -1; }
+		if (thr_all[mot] == NULL) { puts("thr_all Out of memory..."); return -1; }
 		fpr_all[mot] = new double[nthr_dist[mot]];
-		if (fpr_all[mot] == NULL) { puts("Out of memory..."); return -1; }
+		if (fpr_all[mot] == NULL) { puts("fpr_all Out of memory..."); return -1; }
 		k = 0;
 		while (fgets(d, sizeof(d), in_tab) != NULL)
 		{
@@ -1150,7 +1117,7 @@ int main(int argc, char* argv[])
 			olen[mot] = sta[mot].len;
 		}						
 	}
-	PWM_SGA_rec_real(pwm, min, raz, sta, model_type, nthr_dist, thr_all, fpr_all, seq, olen, nseq_real, shift, length_fasta_max, file_model[0], file_model[1], file_hist, file_prc, file_sta);
+	PWM_SGA_rec_real(pwm, min, raz, sta, model_type, nthr_dist, thr_all, fpr_all, seq, olen, nseq_real, shift, length_fasta_max, file_model[0], file_model[1], file_hist, file_prc, file_sta, yes_out_hist,yes_out_prc, long_out_sta);
 	for (k = 0; k < 2; k++)
 	{
 		delete[] thr_all[k];
