@@ -13,18 +13,18 @@ The tool takes a tested FASTA file, and two motifs. Next, it is defined that amo
 
 MotAli tool requires the following input data:
 
-- FASTA file to recognize two motifs
 - Two motifs, only PWM and SiteGA motif models are supported. PWM motif is represented by the position frequency matrix in a [standard format](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B.pfm), and the SiteGA model is the [list of locally positioned dinucleotides with their weights](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/PEAKS039234_BHLHA15_Q9QYC3_MACS2_1_40_cmat1), [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545).
+- FASTA file to recognize these two motifs
 - Two tables 'Threshold vs. ERR (Expected Recognition Rate)' computed preliminary with the FASTA file of promoters of protein-coding genes of whole genome, [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545), example FASTA file for [mouse](https://github.com/parthian-sterlet/mcot-kernel/blob/master/genomes/mm/ups2kb_mm10.seq.tar.gz)
 
-MotAli tool has two parameters:
+MotAli tool needs two parameters:
 - The threshold of the Expected Recognition Rate (ERR) for both motifs, [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545)
 - The maximal shift between centers of two motifs, L
   
 # Output data
 - Histograms of AUPRC values as a function of the mutual orientation of two motifs (they either in the same or opposite strands) and the shift between the centers of two motifs. Three histograms shows distributions for the pair of input motif (heterotypic case), and two separate distributions for the first and second motifs (two homotypic cases).
 - List of PR curves for two possible mutual orientations of motifs (Direct and Opposite strands) and shifts, -L <= x <= L, x denotes the shift of one motif relative to another motif. Three blocks of data are curves for the pair of input motif (heterotypic case), and two separate blocks of curves for the first and second motifs (two homotypic cases).
-- Best similarity score values for (a) the stringent criterion on the overlap of the centers of two motifs, and (b) any higher shifts between centers of two motifs, including their location with spacers and small overlaps. 
+- Best similarity score values and maximal AIPRC values for (a) the stringent criterion on the overlap of the centers of two motifs, and (b) any higher shifts between centers of two motifs, including their location with spacers and small overlaps. 
 
 # Source code
 
