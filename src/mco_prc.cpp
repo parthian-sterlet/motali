@@ -312,7 +312,8 @@ void PWMScore(double **pwm, double& min, double& raz, int len1)
 	raz -= min;
 }
 int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], int model_type[2], int nthr_dist[2], double** thr_all, double** fpr_all, char*** seq, int olen[2], int nseq,
-	int shift, int length_fasta_max, char* file_model1, char* file_model2, char *file_hist, char* file_prc, char* file_sta, int yes_out_hist, int yes_out_prc, int long_out_sta)
+	int shift, int length_fasta_max, char *file_hist, char* file_prc, int yes_out_hist, int yes_out_prc,double *auprc_final_all, double *auprc_final_over, 
+	double &auprc_final_over1,double &auprc_final_all1,double *shift_final_all,double *shift_final_over,char *strand_final_all,char *strand_final_over)
 {
 	int i, j, k, n, m;	
 	int compl1, kmin, kmax;
@@ -433,11 +434,11 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 	for (j = 0; j < 3; j++)
 	{
 		tp[j] = new double** [2];
-		if (tp[j] == NULL) { puts("TP Out of memory..."); exit(1); }
+		if (tp[j] == NULL) { puts("TP Out of memory..."); return -1; }
 		for (k = 0; k < 2; k++)
 		{
 			tp[j][k] = new double* [n_shift[j]];
-			if (tp[k] == NULL) { puts("TP Out of memory..."); exit(1); }
+			if (tp[k] == NULL) { puts("TP Out of memory..."); return -1; }
 			for (i = 0; i < n_shift[j]; i++)
 			{
 				tp[j][k][i] = new double[nthr_dist_two];
@@ -460,21 +461,21 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 	for (j = 0; j < 3; j++)
 	{
 		tp_tot[j] = new double* [2];
-		if (tp_tot[j] == NULL) { puts("TP_tot Out of memory..."); exit(1); }
+		if (tp_tot[j] == NULL) { puts("TP_tot Out of memory..."); return -1; }
 		for (k = 0; k < 2; k++)
 		{
 			tp_tot[j][k] = new double[n_shift[j]];
-			if (tp_tot[j][k] == NULL) { puts("TP_tot Out of memory..."); exit(1); }
+			if (tp_tot[j][k] == NULL) { puts("TP_tot Out of memory..."); return -1; }
 		}
 	}
 	for (j = 0; j < 3; j++) for (k = 0; k < 2; k++)for (i = 0; i < n_shift[j]; i++)tp_tot[j][k][i] = 0;
 	int*** err_inx;
 	err_inx = new int** [2];
-	if (err_inx == NULL) { puts("Err_inx Out of memory..."); exit(1); }	
+	if (err_inx == NULL) { puts("Err_inx Out of memory..."); return -1; }
 	for (k = 0; k < 2; k++)
 	{
 		err_inx[k] = new int* [2];
-		if (err_inx[k] == NULL) { puts("Err_inx Out of memory..."); exit(1); }
+		if (err_inx[k] == NULL) { puts("Err_inx Out of memory..."); return -1; }
 		for (i = 0; i < 2; i++)
 		{
 			err_inx[k][i] = new int[length_fasta_max];
@@ -650,7 +651,7 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 		if ((out_hist = fopen(file_hist, "wt")) == NULL)
 		{
 			printf("Output file can't be opened!\n");
-			exit(1);
+			return -1;
 		}
 	}
 	if (yes_out_prc == 1)
@@ -658,7 +659,7 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 		if ((out_prc = fopen(file_prc, "wt")) == NULL)
 		{
 			printf("Output file can't be opened!\n");
-			exit(1);
+			return -1;
 		}
 	}
 	for (j = 0; j < 3; j++)
@@ -775,10 +776,10 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 	double auprc_ov[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
 	int j_best[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
 	int j_ov[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
-	double auprc_final_all[3];
-	double auprc_final_over[3];
-	char strand_final_all[3], strand_final_over[3];
-	double shift_final_all[3], shift_final_over[3];
+	//double auprc_final_all[3];
+	//double auprc_final_over[3];
+	//char strand_final_all[3], strand_final_over[3];
+	//double shift_final_all[3], shift_final_over[3];
 
 	for (j = 0; j < 3; j++)
 	{
@@ -834,36 +835,11 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 		}
 	}
 	double maxi = Max(auprc_final_over[1], auprc_final_over[2]);
-	double auprc_final_over1 = auprc_final_over[0] / maxi;
+	auprc_final_over1 = auprc_final_over[0] / maxi;
 	if (auprc_final_over1 > 1)auprc_final_over1 = 1;
 	maxi = Max(auprc_final_all[1], auprc_final_all[2]);
-	double auprc_final_all1 = auprc_final_all[0] / maxi;
+	auprc_final_all1 = auprc_final_all[0] / maxi;
 	if (auprc_final_all1 > 1)auprc_final_all1 = 1;
-	FILE* out_sta;
-	if ((out_sta = fopen(file_sta, "at")) == NULL)
-	{
-		printf("Output file can't be opened!\n");
-		exit(1);
-	}	
-	if (long_out_sta == 1)
-	{
-		fprintf(out_sta, "%s\t%s\t", file_model1, file_model2);
-		fprintf(out_sta, "Overlap\t%f\t", auprc_final_over1);
-		fprintf(out_sta, "All\t%f\t", auprc_final_all1);
-		//overap
-		for (j = 0; j < 3; j++)fprintf(out_sta, "\t%f", auprc_final_over[j]);
-		for (j = 0; j < 3; j++)fprintf(out_sta, "\t%.1f", shift_final_over[j]);
-		fprintf(out_sta, "\t");
-		for (j = 0; j < 3; j++)fprintf(out_sta, "%c", strand_final_over[j]);
-		//all
-		for (j = 0; j < 3; j++)fprintf(out_sta, "\t%f", auprc_final_all[j]);
-		for (j = 0; j < 3; j++)fprintf(out_sta, "\t%.1f", shift_final_all[j]);
-		fprintf(out_sta, "\t");
-		for (j = 0; j < 3; j++)fprintf(out_sta, "%c", strand_final_all[j]);
-		fprintf(out_sta, "\n");
-	}
-	else fprintf(out_sta, "\t%f", auprc_final_over1);
-	fclose(out_sta);
 	delete[] errs;
 	for (k = 0; k < 2; k++)
 	{
@@ -1117,7 +1093,41 @@ int main(int argc, char* argv[])
 			olen[mot] = sta[mot].len;
 		}						
 	}
-	PWM_SGA_rec_real(pwm, min, raz, sta, model_type, nthr_dist, thr_all, fpr_all, seq, olen, nseq_real, shift, length_fasta_max, file_model[0], file_model[1], file_hist, file_prc, file_sta, yes_out_hist,yes_out_prc, long_out_sta);
+	double auprc_final_all[3], auprc_final_over[3];
+	double auprc_final_over1 = 0, auprc_final_all1 = 0;
+	char strand_final_all[4], strand_final_over[4];
+	for (k = 0; k < 3; k++)strand_final_all[k] = strand_final_over[k] = '+';
+	strand_final_all[3] = strand_final_over[3] = '\0';
+	double shift_final_all[3] = {0,0,0}, shift_final_over[3] = { 0,0,0 };
+	for (k = 0; k < 3; k++)shift_final_all[k] = shift_final_over[k] = 0;
+	PWM_SGA_rec_real(pwm, min, raz, sta, model_type, nthr_dist, thr_all, fpr_all, seq, olen, nseq_real, shift, length_fasta_max, file_hist, file_prc, yes_out_hist,yes_out_prc, 
+		auprc_final_all, auprc_final_over, auprc_final_over1, auprc_final_all1, shift_final_all, shift_final_over, strand_final_all, strand_final_over);
+	FILE* out_sta;
+	if ((out_sta = fopen(file_sta, "at")) == NULL)
+	{
+		printf("Output file can't be opened!\n");
+		exit(1);
+	}
+	if (long_out_sta == 1)
+	{
+		fprintf(out_sta, "%s\t%s\t", file_model[0], file_model[1]);
+		fprintf(out_sta, "Overlap\t%f\t", auprc_final_over1);
+		fprintf(out_sta, "All\t%f\t", auprc_final_all1);
+		//overap
+		for (i = 0; i < 3; i++)fprintf(out_sta, "\t%f", auprc_final_over[i]);
+		for (i = 0; i < 3; i++)fprintf(out_sta, "\t%.1f", shift_final_over[i]);
+		fprintf(out_sta, "\t");
+		for (i = 0; i < 3; i++)fprintf(out_sta, "%c", strand_final_over[i]);
+		//all
+		for (i = 0; i < 3; i++)fprintf(out_sta, "\t%f", auprc_final_all[i]);
+		for (i = 0; i < 3; i++)fprintf(out_sta, "\t%.1f", shift_final_all[i]);
+		fprintf(out_sta, "\t");
+		for (i = 0; i < 3; i++)fprintf(out_sta, "%c", strand_final_all[i]);
+		fprintf(out_sta, "\n");
+	}
+	else fprintf(out_sta, "\t%f", auprc_final_over1);
+	fclose(out_sta);
+
 	for (k = 0; k < 2; k++)
 	{
 		delete[] thr_all[k];
