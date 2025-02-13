@@ -14,8 +14,8 @@ The tool takes a tested FASTA file, and two motifs. Next, it is defined that amo
 MotAli tool requires the following input data:
 
 - Two motifs, only PWM and SiteGA motif models are supported. PWM motif is represented by the position frequency matrix in a [standard format](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B.pfm), and the SiteGA model is the [list of locally positioned dinucleotides with their weights](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/PEAKS039234_BHLHA15_Q9QYC3_MACS2_1_40_cmat1), [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545).
-- FASTA file to recognize these two motifs
-- Two tables 'Threshold vs. ERR (Expected Recognition Rate)' computed preliminary with the FASTA file of promoters of protein-coding genes of whole genome, [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545), example FASTA file for [mouse](https://github.com/parthian-sterlet/mcot-kernel/blob/master/genomes/mm/ups2kb_mm10.seq.tar.gz)
+- FASTA file to recognize these two motifs, e.g. ChIP-seq peaks, see example format here [top 1000 peaks for mouse BHLHA15 TF](https://github.com/parthian-sterlet/motali/blob/main/examples/PEAKS039234_BHLHA15_Q9QYC3_MACS2.fa)
+- Two tables 'Threshold vs. ERR (Expected Recognition Rate)', see example format here [ERR table for the motif of mouse BHLHA15 TF](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B.dist). These tables computed preliminary with the FASTA file of promoters of protein-coding genes of whole genome, [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545), example FASTA file for [mouse](https://github.com/parthian-sterlet/mcot-kernel/blob/master/genomes/mm/ups2kb_mm10.seq.tar.gz)
 
 MotAli tool needs two parameters:
 - The threshold of the Expected Recognition Rate (ERR) for both motifs, [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545)
