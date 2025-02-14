@@ -20,7 +20,7 @@ Descibed above calculations are performed for the pair of motifs 'motifA & motif
 
 Following input data are required:
 
-- Two motifs, only PWM and SiteGA motif models are supported. PWM motif is represented by the position frequency matrix in a [standard format](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B.pfm), and the SiteGA model is the [list of locally positioned dinucleotides with their weights](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/PEAKS039234_BHLHA15_Q9QYC3_MACS2_1_40_cmat1), [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545).
+- Two motifs, only PWM and SiteGA motif models are supported. The PWM motif is represented by the position frequency matrix in [standard format](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B.pfm), and the SiteGA model is the [list of locally positioned dinucleotides with their weights](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/PEAKS039234_BHLHA15_Q9QYC3_MACS2_1_40_cmat1), [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545).
 - FASTA file to recognize these two motifs, e.g. ChIP-seq peaks, see example format here [top 1000 peaks for mouse BHLHA15 TF](https://github.com/parthian-sterlet/motali/blob/main/examples/PEAKS039234_BHLHA15_Q9QYC3_MACS2.fa)
 - Two tables 'Threshold vs. ERR (Expected Recognition Rate)', see example format here [ERR table for the motif of mouse BHLHA15 TF](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B.dist). These tables computed preliminary with the FASTA file of promoters of protein-coding genes of whole genome, [(Tsukanov et al., 2022)](https://doi.org/10.3389/fpls.2022.938545), example FASTA file for [mouse](https://github.com/parthian-sterlet/mcot-kernel/blob/master/genomes/mm/ups2kb_mm10.seq.tar.gz)
 
@@ -30,9 +30,9 @@ The tool needs two parameters:
   
 # Output data
 - The similarity scores and the maximal AUPRC values for (a) the stringent criterion on the overlap of the centers of two motifs, and (b) any shifts between the centers of two motifs, including their location with spacers and small overlaps. 
-- Histograms of AUPRC values as a function of the mutual orientation of two motifs (they either in the same or opposite strands) and the shift between their centers. Three histograms show distributions for the pair of input motif (heterotypic case, motifA/motifB), and two separate distributions for the first and second motifs (two homotypic cases, motifA/motifA and motifB/motifB).
+- Histograms of AUPRC values as a function of the mutual orientation of two motifs (they either in the same or opposite strands) and the shift between their centers. Three histograms show distributions for the pair of input motif (heterotypic case, motifA/motifB), and two separate distributions for the first and second motifs (two homotypic cases, motifA/motifA and motifB/motifB). Due to possible even/odd lengths of motifs in a pair, positions in a histograms are marked either by integer or non-integer values, ..., -2, -1, 0, +1, +2, ... or ..., -1.5, -0.5, +0.5, +1.5, ..., respectively.
 - PR curves for two possible mutual orientations of motifs (motifs in the same and opposite strands) and shifts, -L <= x <= L, x denotes the positive shift means that the longer/shorter motifs are located closer to 5'/3' 
- ends of sequences. Three blocks of data are PR curves for the pair of input motif (heterotypic case), and two separate blocks of curves for the first and second motifs (two homotypic cases).
+ ends of DNA sequence alignment. Three blocks of data are PR curves for the pair of input motif (heterotypic case), and two separate blocks of curves for the first and second motifs (two homotypic cases).
 
 # Source code
 
