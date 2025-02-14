@@ -8,7 +8,7 @@ This repository presents the MotAli tool to estimate the similarity of two motif
 
 # Algorithm
 
-_Preparing of input data for motifs_
+## Preparing of input data for motifs
 
 The tool takes a tested FASTA file, and two motifs. Next, it is defined that among these two motifs motifA/motifB have the longer/shorter lengths, If Length(motifA) >= Length(motifB) then the longer/shorter ones are motifA/motifB, othewise otherwise vice versa. The input parameter of ERR (Expected Recognition rate) transforms the recogntion thresholds of both motifs to the uniform scale. Following previously developed approaches ([MCOT, Levitsky et al., 2019](https://doi.org/10.1093/nar/gkz800)) and ([MetArea, Levitsky et al., 2024](https://doi.org/10.18699/vjgb-24-90)), for each motif ERR is defined as the fraction of all tested positions in the whole-genome set of promoters of protein-coding genes that contain predicted sites. The tables 'Threshold vs. -Log10(ERR)' are preliminary computed for each of input motifs. 
 
