@@ -772,15 +772,11 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 	}	
 	if (yes_out_prc == 1)fclose(out_prc);
 	if (yes_out_hist == 1)fclose(out_hist);	
-	double auprc_max[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
-	double auprc_ov[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
-	int j_best[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
-	int j_ov[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
-	//double auprc_final_all[3];
-	//double auprc_final_over[3];
-	//char strand_final_all[3], strand_final_over[3];
-	//double shift_final_all[3], shift_final_over[3];
-
+	double auprc_max[3][2] = { { -1,-1 },{ -1,-1 },{ -1,-1 } };
+	double auprc_ov[3][2] = { { -1,-1 },{ -1,-1 },{ -1,-1 } };
+	//int j_best[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
+	//int j_ov[3][2] = { { 0,0 },{ 0,0 },{ 0,0 } };
+	char cepi[] = "+-";
 	for (j = 0; j < 3; j++)
 	{
 		for (i = 0; i < n_shift[j]; i++)
@@ -791,8 +787,10 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 				{
 					if (auprc[j][k][i] > auprc_ov[j][k])
 					{
-						auprc_ov[j][k] = auprc[j][k][i];
-						j_ov[j][k] = i;
+						auprc_ov[j][k] = auprc[j][k][i];						
+						strand_final_over[j] = cepi[k];
+						shift_final_over[j] = wshift[j][i];
+						auprc_final_over[j] = auprc[j][k][i];
 					}
 				}
 			}
@@ -803,13 +801,14 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 			{
 				if (auprc[j][k][i] > auprc_max[j][k])
 				{
-					auprc_max[j][k] = auprc[j][k][i];
-					j_best[j][k] = i;
+					auprc_final_all[j] = auprc_max[j][k] = auprc[j][k][i];
+					strand_final_all[j] = cepi[k];
+					shift_final_all[j] = wshift[j][i];					
 				}
 			}
 		}
 	}
-	for (j = 0; j < 3; j++)
+	/*for (j = 0; j < 3; j++)
 	{
 		auprc_final_all[j] = Max(auprc_max[j][0], auprc_max[j][1]);
 		auprc_final_over[j] = Max(auprc_ov[j][0], auprc_ov[j][1]);
@@ -833,7 +832,7 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 			strand_final_over[j] = '-';
 			shift_final_over[j] = wshift[j][j_ov[j][1]];
 		}
-	}
+	}*/
 	double maxi = Max(auprc_final_over[1], auprc_final_over[2]);
 	auprc_final_over1 = auprc_final_over[0] / maxi;
 	if (auprc_final_over1 > 1)auprc_final_over1 = 1;
@@ -916,7 +915,7 @@ int main(int argc, char* argv[])
 {
 	int i, k, mot;
 	char file_fasta[ARGLEN], file_model[2][ARGLEN], type_model[2][4], file_table[2][ARGLEN];
-	char file_hist[ARGLEN], file_prc[ARGLEN], file_sta[ARGLEN];
+	char file_hist[ARGLEN], file_prc[ARGLEN], file_sta_short[ARGLEN], file_sta_long[ARGLEN];
 	char*** seq;// peaks
 	double*** pwm;
 	city sta[2];	
@@ -925,7 +924,7 @@ int main(int argc, char* argv[])
 	if (argc != 16)
 	{
 		fprintf(stderr, "Syntax error: %s 1file_fasta 2motif1_type 3motif2_type 4file_motif1_matrix 5file_motif2_matrix 6file_motif1_table 7file_motif2_table 8int max_shift_of_motif_centers", argv[0]);
-		fprintf(stderr, "9double pvalue_thr 10file out_hist 11file_out_prc 12 file_out_sta 13int 1yes,0no out_hist 14int 1yes,0no out_prc 15int 0short 1long sta out\n");
+		fprintf(stderr, "9double pvalue_thr 10file out_hist 11yes,0no out_hist 12file_out_prc 13int 1yes,0no out_prc 14file_out_sta_short 15file_out_sta_detailed\n");
 		return -1;
 	}
 	strcpy(file_fasta, argv[1]);	
@@ -939,11 +938,11 @@ int main(int argc, char* argv[])
 	double pvalue = atof(argv[9]); //threshold of expected recogntion rate 
 	double pvalue_lg = -log10(pvalue);
 	strcpy(file_hist, argv[10]);
-	strcpy(file_prc, argv[11]);
-	strcpy(file_sta, argv[12]);
-	int yes_out_hist = atoi(argv[13]);
-	int yes_out_prc = atoi(argv[14]);
-	int long_out_sta = atoi(argv[15]);
+	int yes_out_hist = atoi(argv[11]);
+	strcpy(file_prc, argv[12]);
+	int yes_out_prc = atoi(argv[13]);
+	strcpy(file_sta_short, argv[14]);
+	strcpy(file_sta_long, argv[15]);
 
 	{
 		char pwm1[] = "pwm", pwm2[] = "PWM", sga1[] = "sga", sga2[] = "SGA";
@@ -1102,31 +1101,45 @@ int main(int argc, char* argv[])
 	for (k = 0; k < 3; k++)shift_final_all[k] = shift_final_over[k] = 0;
 	PWM_SGA_rec_real(pwm, min, raz, sta, model_type, nthr_dist, thr_all, fpr_all, seq, olen, nseq_real, shift, length_fasta_max, file_hist, file_prc, yes_out_hist,yes_out_prc, 
 		auprc_final_all, auprc_final_over, auprc_final_over1, auprc_final_all1, shift_final_all, shift_final_over, strand_final_all, strand_final_over);
-	FILE* out_sta;
-	if ((out_sta = fopen(file_sta, "at")) == NULL)
+	FILE* out_sta_long;
+	if ((out_sta_long = fopen(file_sta_long, "at")) == NULL)
 	{
 		printf("Output file can't be opened!\n");
 		exit(1);
 	}
-	if (long_out_sta == 1)
+	fprintf(out_sta_long, "%s\t%s", file_model[0], file_model[1]);
+	fprintf(out_sta_long, "\tOverlap\t%f", auprc_final_over1);
+	fprintf(out_sta_long, "\tAll\t%f", auprc_final_all1);
+	fprintf(out_sta_long, "\tHeterotypic");
+	//overap
+	fprintf(out_sta_long, "\t%f", auprc_final_over[0]);
+	fprintf(out_sta_long, "\t%.1f", shift_final_over[0]);		
+	fprintf(out_sta_long, "\t%c", strand_final_over[0]);
+	//all
+	fprintf(out_sta_long, "\t%f", auprc_final_all[0]);
+	fprintf(out_sta_long, "\t%.1f", shift_final_all[0]);		
+	fprintf(out_sta_long, "\t%c", strand_final_all[0]);
+	fprintf(out_sta_long, "\tHomotypic");
+	//overap
+	for (i = 1; i < 3; i++)fprintf(out_sta_long, "\t%f", auprc_final_over[i]);
+	for (i = 1; i < 3; i++)fprintf(out_sta_long, "\t%.1f", shift_final_over[i]);
+	fprintf(out_sta_long, "\t");
+	for (i = 1; i < 3; i++)fprintf(out_sta_long, "%c", strand_final_over[i]);
+	//all
+	for (i = 1; i < 3; i++)fprintf(out_sta_long, "\t%f", auprc_final_all[i]);
+	for (i = 1; i < 3; i++)fprintf(out_sta_long, "\t%.1f", shift_final_all[i]);
+	fprintf(out_sta_long, "\t");
+	for (i = 1; i < 3; i++)fprintf(out_sta_long, "%c", strand_final_all[i]);
+	fprintf(out_sta_long, "\n");
+	fclose(out_sta_long);
+	FILE* out_sta_short;
+	if ((out_sta_short = fopen(file_sta_short, "at")) == NULL)
 	{
-		fprintf(out_sta, "%s\t%s\t", file_model[0], file_model[1]);
-		fprintf(out_sta, "Overlap\t%f\t", auprc_final_over1);
-		fprintf(out_sta, "All\t%f\t", auprc_final_all1);
-		//overap
-		for (i = 0; i < 3; i++)fprintf(out_sta, "\t%f", auprc_final_over[i]);
-		for (i = 0; i < 3; i++)fprintf(out_sta, "\t%.1f", shift_final_over[i]);
-		fprintf(out_sta, "\t");
-		for (i = 0; i < 3; i++)fprintf(out_sta, "%c", strand_final_over[i]);
-		//all
-		for (i = 0; i < 3; i++)fprintf(out_sta, "\t%f", auprc_final_all[i]);
-		for (i = 0; i < 3; i++)fprintf(out_sta, "\t%.1f", shift_final_all[i]);
-		fprintf(out_sta, "\t");
-		for (i = 0; i < 3; i++)fprintf(out_sta, "%c", strand_final_all[i]);
-		fprintf(out_sta, "\n");
+		printf("Output file can't be opened!\n");
+		exit(1);
 	}
-	else fprintf(out_sta, "\t%f", auprc_final_over1);
-	fclose(out_sta);
+	fprintf(out_sta_short, "\t%f", auprc_final_over1);
+	fclose(out_sta_short);
 
 	for (k = 0; k < 2; k++)
 	{
