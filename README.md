@@ -54,11 +54,11 @@ The tool needs two parameters:
 8. double ERR threshold, the default value is 0.002, this value (maximal Expected Recognition Rate) means the lowest threshold used to predicts site and compute the area under PR curve. This ERR value defines the range of recognition thresholds from the table 'Threshold vs. ERR'.
 9. integer value, L, maximal shift between the centers of the first and second motifs, the default value is 50 bp
 10. output file, histograms of AUPRC values for both orientations of motifs all shifts of their centers, [Histogram](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B_PEAKS039234_BHLHA15_Q9QYC3_MACS2_40_cmat1.hist)
-11. output file, PR curves for both orientations of motifs all shifts of their centers, [PR curves](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B_PEAKS039234_BHLHA15_Q9QYC3_MACS2_40_cmat1.prc)
-12. output file, text file of similarity scores and the maximal AUPRC values for the stringent overlap and any shift between the centers of two motifs, [Similarity scores and AUPRC values](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B_PEAKS039234_BHLHA15_Q9QYC3_MACS2_40_cmat1.sta)
-13. integer value, 0/1 mean printing and non-printing of histograms of AUPRC values to the output file (see argument #10 above)
-14. integer value, 0/1 mean printing and non-printing of PR curves to the output file (see argument #11 above)
-15. integer value, 0/1 mean short/detailed description of results in the output file of similarity scores and the maximal AUPRC values (see argument #12 above)
+11. integer value, 0/1 mean printing and non-printing of histograms of AUPRC values to the output file (see argument #10 above)
+12. output file, PR curves for both orientations of motifs all shifts of their centers, [PR curves](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B_PEAKS039234_BHLHA15_Q9QYC3_MACS2_40_cmat1.prc)
+13. integer value, 0/1 mean printing and non-printing of PR curves to the output file (see argument #12 above)
+14. output file, short text file of the similarity score for the stringent overlap of the centers of two motifs
+15. output file, text file of the similarity scores and AUPRC values for the stringent overlap and any shift between the centers of two motifs, and the details of the alignment of two motifs (shifts of the centers of two motifs and orientations of two motifs respecting the maximal AUPRC values) [Similarity scores and AUPRC values](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B_PEAKS039234_BHLHA15_Q9QYC3_MACS2_40_cmat1.sta)
 
 # Command line examples
 - One PWM motif vs. another PWM motif
