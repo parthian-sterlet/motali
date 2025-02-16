@@ -915,16 +915,16 @@ int main(int argc, char* argv[])
 {
 	int i, k, mot;
 	char file_fasta[ARGLEN], file_model[2][ARGLEN], type_model[2][4], file_table[2][ARGLEN];
-	char file_hist[ARGLEN], file_prc[ARGLEN], file_sta_short[ARGLEN], file_sta_long[ARGLEN];
+	char file_hist[ARGLEN], file_prc[ARGLEN], file_short_all[ARGLEN], file_short_over[ARGLEN], file_sta_long[ARGLEN];
 	char*** seq;// peaks
 	double*** pwm;
 	city sta[2];	
 	int model_type[2] = { -1,-1 };// 0 pwm 1 sga
 	
-	if (argc != 16)
+	if (argc != 17)
 	{
 		fprintf(stderr, "Syntax error: %s 1file_fasta 2motif1_type 3motif2_type 4file_motif1_matrix 5file_motif2_matrix 6file_motif1_table 7file_motif2_table 8int max_shift_of_motif_centers", argv[0]);
-		fprintf(stderr, "9double pvalue_thr 10file out_hist 11yes,0no out_hist 12file_out_prc 13int 1yes,0no out_prc 14file_out_sta_short 15file_out_sta_detailed\n");
+		fprintf(stderr, "9double pvalue_thr 10file out_hist 11yes,0no out_hist 12file_out_prc 13int 1yes,0no out_prc 14file_out_short_over 15file_out_short_all 16file_out_sta_detailed\n");
 		return -1;
 	}
 	strcpy(file_fasta, argv[1]);	
@@ -941,8 +941,9 @@ int main(int argc, char* argv[])
 	int yes_out_hist = atoi(argv[11]);
 	strcpy(file_prc, argv[12]);
 	int yes_out_prc = atoi(argv[13]);
-	strcpy(file_sta_short, argv[14]);
-	strcpy(file_sta_long, argv[15]);
+	strcpy(file_short_over, argv[14]);
+	strcpy(file_short_all, argv[15]);
+	strcpy(file_sta_long, argv[16]);
 
 	{
 		char pwm1[] = "pwm", pwm2[] = "PWM", sga1[] = "sga", sga2[] = "SGA";
@@ -1132,14 +1133,23 @@ int main(int argc, char* argv[])
 	for (i = 1; i < 3; i++)fprintf(out_sta_long, "%c", strand_final_all[i]);
 	fprintf(out_sta_long, "\n");
 	fclose(out_sta_long);
-	FILE* out_sta_short;
-	if ((out_sta_short = fopen(file_sta_short, "at")) == NULL)
+	FILE* out_short_over;
+	if ((out_short_over = fopen(file_short_over, "at")) == NULL)
 	{
 		printf("Output file can't be opened!\n");
 		exit(1);
 	}
-	fprintf(out_sta_short, "\t%f", auprc_final_over1);
-	fclose(out_sta_short);
+	fprintf(out_short_over, "\t%f", auprc_final_over1);
+	fclose(out_short_over);
+
+	FILE* out_short_all;
+	if ((out_short_all = fopen(file_short_all, "at")) == NULL)
+	{
+		printf("Output file can't be opened!\n");
+		exit(1);
+	}
+	fprintf(out_short_all, "\t%f", auprc_final_all1);
+	fclose(out_short_all);
 
 	for (k = 0; k < 2; k++)
 	{
