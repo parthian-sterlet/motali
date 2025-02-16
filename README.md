@@ -57,8 +57,9 @@ The tool needs two parameters:
 11. integer value, 0/1 mean printing and non-printing of histograms of AUPRC values to the output file (see argument #10 above)
 12. output file, PR curves for both orientations of motifs all shifts of their centers, [PR curves](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B_PEAKS039234_BHLHA15_Q9QYC3_MACS2_40_cmat1.prc)
 13. integer value, 0/1 mean printing and non-printing of PR curves to the output file (see argument #12 above)
-14. output file, short text file of the similarity score for the stringent overlap of the centers of two motifs
-15. output file, text file of the similarity scores and AUPRC values for the stringent overlap and any shift between the centers of two motifs, and the details of the alignment of two motifs (shifts of the centers of two motifs and orientations of two motifs respecting the maximal AUPRC values) [Similarity scores and AUPRC values](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B_PEAKS039234_BHLHA15_Q9QYC3_MACS2_40_cmat1.sta)
+14. output file, short text file of the similarity score for the shifts between the centers of two motifs implying their stringent overlap, file contains only the tabulator symbol '\t' and the similarity score
+15. output file, short text file of the similarity score for any allowable of the centers of two motifs, file contains only the tabulator symbol '\t' and the similarity score
+16. output file, text file of the similarity scores and AUPRC values for the stringent overlap and any shift between the centers of two motifs, and the details of the alignment of two motifs (shifts of the centers of two motifs and orientations of two motifs respecting the maximal AUPRC values) [Similarity scores and AUPRC values](https://github.com/parthian-sterlet/motali/blob/main/examples/pwm_sga/BHA15.H12CORE.0.P.B_PEAKS039234_BHLHA15_Q9QYC3_MACS2_40_cmat1.sta)
 
 # Command line examples
 - One PWM motif vs. another PWM motif
