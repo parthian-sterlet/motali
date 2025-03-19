@@ -440,7 +440,7 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 		for (k = 0; k < 2; k++)
 		{
 			tp[j][k] = new int* [n_shift[j]];
-			if (tp[k] == NULL) { puts("TP Out of memory..."); return -1; }
+			if (tp[j][k] == NULL) { puts("TP Out of memory..."); return -1; }
 			for (i = 0; i < n_shift[j]; i++)
 			{
 				tp[j][k][i] = new int[nthr_dist_two];
