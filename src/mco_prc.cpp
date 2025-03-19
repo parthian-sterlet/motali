@@ -334,6 +334,7 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 	kpairs[0][1] = kpairs[2][0] = kpairs[2][1] = kmin;
 	double** wshift;
 	wshift = new double* [3];
+	if (wshift == NULL) { fprintf(stderr, "Error: Not of memory..."); return -1; }
 	for(i = 0; i < 3; i++)
 	{
 		int kk[2];
@@ -428,20 +429,21 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 			cou[model]++;
 		}		
 	}
-	double**** tp, **fp;
-	tp = new double*** [3];
+	int **** tp;
+	double ** fp;
+	tp = new int*** [3];
 	if (tp == NULL) { fprintf(stderr, "TP Out of memory..."); return -1; }
 	for (j = 0; j < 3; j++)
 	{
-		tp[j] = new double** [2];
+		tp[j] = new int** [2];
 		if (tp[j] == NULL) { puts("TP Out of memory..."); return -1; }
 		for (k = 0; k < 2; k++)
 		{
-			tp[j][k] = new double* [n_shift[j]];
+			tp[j][k] = new int* [n_shift[j]];
 			if (tp[k] == NULL) { puts("TP Out of memory..."); return -1; }
 			for (i = 0; i < n_shift[j]; i++)
 			{
-				tp[j][k][i] = new double[nthr_dist_two];
+				tp[j][k][i] = new int[nthr_dist_two];
 				if (tp[j][k][i] == NULL) { fprintf(stderr, "TP  Out of memory..."); return -1; }
 			}
 		}
@@ -455,16 +457,17 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 		if (fp[j] == NULL) { fprintf(stderr, "FP Out of memory..."); return -1; }
 	}	
 	for (j = 0; j < 3; j++)for (m = 0; m < nthr_dist_two; m++)fp[j][m] = 0;
-	double*** tp_tot, fp_tot[3] = { 0,0,0 };
-	tp_tot = new double** [3];
+	int*** tp_tot;
+	double fp_tot[3] = { 0,0,0 };
+	tp_tot = new int** [3];
 	if (tp_tot == NULL) { fprintf(stderr, "TP_tot Out of memory..."); return -1; }
 	for (j = 0; j < 3; j++)
 	{
-		tp_tot[j] = new double* [2];
+		tp_tot[j] = new int* [2];
 		if (tp_tot[j] == NULL) { puts("TP_tot Out of memory..."); return -1; }
 		for (k = 0; k < 2; k++)
 		{
-			tp_tot[j][k] = new double[n_shift[j]];
+			tp_tot[j][k] = new int[n_shift[j]];
 			if (tp_tot[j][k] == NULL) { puts("TP_tot Out of memory..."); return -1; }
 		}
 	}
@@ -745,7 +748,7 @@ int PWM_SGA_rec_real(double ***pwm, double min[2], double raz[2], city sta[2], i
 					if (yes_out_prc == 1)fprintf(out_prc, "%f\t%f\n", tpr_pred, prec_pred);
 					for (i = 0; i < nthr_dist_two; i++)
 					{						
-						dtp += tp[j][k][m][i];
+						dtp += (double)tp[j][k][m][i];
 						dfp += fp[j][i];
 						if (dtp > 0 && (i == nthr_dist_two1 || errs[i + 1].err != errs[i].err))
 						{
